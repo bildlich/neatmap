@@ -121,10 +121,7 @@ function drawOneKindOfElement(jsonPath, className) {
       .append("path")
       .attr("id", function(d) { return d.id; })
       .attr("class", className)
-      .attr("d", function(d) {
-        var transpath = path(d);
-        return transpath;
-      })
+      .attr("d", path)
   });
 }
 
