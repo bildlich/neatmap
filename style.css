@@ -13,8 +13,12 @@ nav a  {
   text-decoration: none;
 }
 
+svg {
+  //background-color: rgb(242,238,232);
+}
+
 path.green {
-  fill: green;
+  fill: #3F0;
 }
 
 path.buildings {
@@ -22,5 +26,5 @@ path.buildings {
 }
 
 path.construction {
-  fill: gray;
+  fill: #FF0;
 }

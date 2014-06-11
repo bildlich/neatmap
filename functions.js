@@ -13,7 +13,8 @@ var m_width = $("#map").width(),
     width = 938,
     height = 500,
     country,
-    state;
+    state,
+    scale_factor = m_width / width;
 
 var projection = d3.geo
     .mercator()
@@ -25,7 +26,7 @@ var path = d3.geo.path()
     .projection(projection);
 
 var svg = d3.select("#map").append("svg")
-    .attr("preserveAspectRatio", "xMidYMid")
+    .attr("preserveAspectRatio", "xMinYMin")
     .attr("viewBox", "0 0 " + width + " " + height)
     .attr("width", m_width)
     .attr("height", m_width * height / width);
@@ -127,14 +128,22 @@ function drawOneKindOfElement(jsonPath, className) {
 
 /* Order items in grid */
 arrangeItems = function(event) {
-  var pathStr, pathArray, topLeft, translateCode, newX=0, newY=startY, maxYInThisLine=gridGapY;
+  var pathStr,
+      pathArray,
+      topLeft,
+      translateCode,
+      newX=0,
+      newY=startY,
+      maxYInThisLine=gridGapY,
+      newSVGHeight = height;
+
   var items = svg.selectAll('path');
   items.each(function(item,index) {
     path = d3.select(this);
     if ((newX + this.getBBox().width) >= width) {
       newY += maxYInThisLine + gridGapY;
       newX = 0;
-      maxYInThisLine=0
+      maxYInThisLine = 0;
     }
     pathStr = path.attr('d');
     pathArray = parse_path(pathStr);
@@ -147,6 +156,8 @@ arrangeItems = function(event) {
     newX += this.getBBox().width + gridGapX;
     maxYInThisLine = Math.max(this.getBBox().height, maxYInThisLine);
   });
+  //console.log(newY, newY*scale_factor, $('path').last().offset());
+  $('svg').height((newY+50)*scale_factor);
 };
 
 /* Move items back to their original position */
@@ -162,9 +173,9 @@ itemsBackToOrigin = function(event) {
 };
 
 /* Draw the map */
+drawOneKindOfElement(jsonPathBuildings, "buildings");
 drawOneKindOfElement(jsonPathGreen, "green");
 drawOneKindOfElement(jsonPathConstruction, "construction");
-drawOneKindOfElement(jsonPathBuildings, "buildings");
 
 /* Bind user events */
 $('a#order').on('click', arrangeItems);
