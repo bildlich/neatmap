@@ -12,3 +12,11 @@ nav {
 nav a  {
   text-decoration: none;
 }
+
+path.green {
+  fill: green;
+}
+
+path.buildings {
+  fill: blue;
+}
