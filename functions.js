@@ -70,19 +70,6 @@ function find_topleft(path) {
   return [minX, minY];
 }
 
-function apply_translation(path, topleft, newPos) {
-  // calculate the vector between the old and new position.
-  // then apply the vector to every point on the path.
-  // (assumes path is in absolute coordinates)
-  // return new path
-  var vector = [newPos[0] - topleft[0], newPos[1] - topleft[1]];
-  for (var i=0; i < path.length; i++) {
-    path[i].X += vector[0];
-    path[i].Y += vector[1];
-  }
-  return path;
-}
-
 function generate_translatecode(topleft, newPos){
   // return the SVG string to specify a translation to topleft coords
   var vector = [newPos[0] - topleft[0], newPos[1] - topleft[1]];
