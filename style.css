@@ -20,3 +20,7 @@ path.green {
 path.buildings {
   fill: blue;
 }
+
+path.construction {
+  fill: gray;
+}

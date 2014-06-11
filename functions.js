@@ -1,12 +1,13 @@
 var jsonPathGreen = "green.topo.json";
+var jsonPathConstruction = "construction.topo.json";
 var jsonPathBuildings = "buildings.topo.json";
-//var jsonPath = "leisure-park.topo.json";
 
 // Settings
-var transitionDuration = 1000; // ms
+var transitionDuration = 3000; // ms
 var gridGapX = 4;
 var gridGapY = 4;
 var startY = 50;
+var MIN_AREA = 8;
 
 var m_width = $("#map").width(),
     width = 938,
@@ -28,8 +29,6 @@ var svg = d3.select("#map").append("svg")
     .attr("viewBox", "0 0 " + width + " " + height)
     .attr("width", m_width)
     .attr("height", m_width * height / width);
-
-var g = svg.append("g");
 
 function parse_path(pathstr) {
   //eg. pathstr is: d="M446.0252875413753,312.49818797687476L445.8401871266942,312.63011114730034L444.8529849150691,313.2017767016805L445.038085329752,313.5095955941215L444.4210839474854,313.94933562872757Z"
@@ -90,8 +89,6 @@ function generate_translatecode(topleft, newPos){
   return "translate("+vector[0]+","+vector[1]+")";  
 }
 
-var MIN_AREA = 8;
-
 function getArea(feature) {
     var parsed_path = parse_path(path(feature));
     var topleft = find_topleft(parsed_path);
@@ -108,6 +105,9 @@ function sortByArea(x,y) {
 function drawOneKindOfElement(jsonPath, className) {
   d3.json(jsonPath, function(error, us) {
       var geometries = topojson.feature(us, us.objects.geojson);
+
+      // Make new group
+      var g = svg.append("g");
 
       // Prune tiny buildings
       var features = geometries.features.filter(function(X) { return getArea(X) > MIN_AREA; });
@@ -128,7 +128,7 @@ function drawOneKindOfElement(jsonPath, className) {
 /* Order items in grid */
 arrangeItems = function(event) {
   var pathStr, pathArray, topLeft, translateCode, newX=0, newY=startY, maxYInThisLine=gridGapY;
-  var items = g.selectAll('path');
+  var items = svg.selectAll('path');
   items.each(function(item,index) {
     path = d3.select(this);
     if ((newX + this.getBBox().width) >= width) {
@@ -151,7 +151,7 @@ arrangeItems = function(event) {
 
 /* Move items back to their original position */
 itemsBackToOrigin = function(event) {
-  var items = g.selectAll('path');
+  var items = svg.selectAll('path');
   items.each(function(item,index) {
     path = d3.select(this);
     path
@@ -162,6 +162,8 @@ itemsBackToOrigin = function(event) {
 };
 
 /* Draw the map */
+drawOneKindOfElement(jsonPathGreen, "green");
+drawOneKindOfElement(jsonPathConstruction, "construction");
 drawOneKindOfElement(jsonPathBuildings, "buildings");
 
 /* Bind user events */
