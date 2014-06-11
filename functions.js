@@ -6,7 +6,7 @@ var jsonPathBuildings = "buildings.topo.json";
 var transitionDuration = 3000; // ms
 var gridGapX = 4;
 var gridGapY = 4;
-var startY = 50;
+var startY = 20;
 var MIN_AREA = 8;
 
 var m_width = $("#map").width(),
@@ -84,9 +84,9 @@ function find_bottomright(path) {
   return [maxX, maxY];
 }
 
-function generate_translatecode(topleft, newPos){
+function generate_translatecode(topleft, newPos, transitionRatio){
   // return the SVG string to specify a translation to topleft coords
-  var vector = [newPos[0] - topleft[0], newPos[1] - topleft[1]];
+  var vector = [(newPos[0] - topleft[0])*transitionRatio, (newPos[1] - topleft[1])*transitionRatio];
   return "translate("+vector[0]+","+vector[1]+")";  
 }
 
@@ -103,12 +103,12 @@ function sortByArea(x,y) {
     return getArea(x) > getArea(y) ? -1 : 1;
 }
 
-function drawOneKindOfElement(jsonPath, className) {
+function drawOneKindOfElement(jsonPath, groupId) {
   d3.json(jsonPath, function(error, us) {
       var geometries = topojson.feature(us, us.objects.geojson);
 
-      // Make new group
-      var g = svg.append("g");
+      // Select the right group
+      var g = svg.select('g#'+groupId);
 
       // Prune tiny buildings
       var features = geometries.features.filter(function(X) { return getArea(X) > MIN_AREA; });
@@ -121,13 +121,18 @@ function drawOneKindOfElement(jsonPath, className) {
       .enter()
       .append("path")
       .attr("id", function(d) { return d.id; })
-      .attr("class", className)
+      .attr("class", groupId)
       .attr("d", path)
   });
 }
 
 /* Order items in grid */
-arrangeItems = function(event) {
+arrangeItems = function(event,transitionRatio) {
+
+  if (transitionRatio == null) {
+    transitionRatio = 1;
+  }
+
   var pathStr,
       pathArray,
       topLeft,
@@ -148,7 +153,7 @@ arrangeItems = function(event) {
     pathStr = path.attr('d');
     pathArray = parse_path(pathStr);
     topLeft = find_topleft(pathArray);
-    translateCode = generate_translatecode(topLeft, [newX,newY]);
+    translateCode = generate_translatecode(topLeft, [newX,newY], transitionRatio);
     path
       .transition()
       .duration(transitionDuration)
@@ -173,10 +178,22 @@ itemsBackToOrigin = function(event) {
 };
 
 /* Draw the map */
-drawOneKindOfElement(jsonPathBuildings, "buildings");
+// Make new group
+svg.append('g').attr('id', 'buildings');
+svg.append('g').attr('id', 'construction');
+svg.append('g').attr('id', 'green');
+drawOneKindOfElement(jsonPathBuildings, 'buildings');
 drawOneKindOfElement(jsonPathGreen, "green");
 drawOneKindOfElement(jsonPathConstruction, "construction");
 
 /* Bind user events */
 $('a#order').on('click', arrangeItems);
 $('a#disorder').on('click', itemsBackToOrigin);
+
+$('body').on('mousemove', function(event) {
+  var percentage = event.clientX / $('body').width();
+  if (percentage < 0.05) {
+    percentage = 0;
+  }
+  arrangeItems(null,percentage);
+});
