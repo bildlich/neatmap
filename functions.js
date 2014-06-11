@@ -76,18 +76,6 @@ function generate_translatecode(topleft, newPos){
   return "translate("+vector[0]+","+vector[1]+")";  
 }
 
-function path_to_svgcode(path){
-  // takes a path in the form of parse_path and returns a string suitable
-  // for SVG
-  var string = "";
-  for (var i=0; i < path.length; i++) {
-    string += path[i].CMD;
-    if (path[i].X != null) {
-      string += path[i].X.toString() + "," + path[i].Y.toString();
-    }
-  }
-}
-
 drawOneKindOfElement = function(jsonPath, className) {
   d3.json(jsonPath, function(error, us) {
     var geometries = topojson.feature(us, us.objects.geojson);
