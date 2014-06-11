@@ -70,17 +70,53 @@ function find_topleft(path) {
   return [minX, minY];
 }
 
+function find_bottomright(path) {
+  // takes results of parse_path, and returns bottomright coordinates
+  // of the path's bounding rectangle as a list, [X, Y]
+  var maxX = path[0].X;
+  var maxY = path[0].Y;
+  for (var i=1; i < path.length; i++) {
+    if (path[i].X != null) {
+        maxX = Math.max(path[i].X, maxX);
+        maxY = Math.max(path[i].Y, maxY);
+    }
+  }
+  return [maxX, maxY];
+}
+
 function generate_translatecode(topleft, newPos){
   // return the SVG string to specify a translation to topleft coords
   var vector = [newPos[0] - topleft[0], newPos[1] - topleft[1]];
   return "translate("+vector[0]+","+vector[1]+")";  
 }
 
-drawOneKindOfElement = function(jsonPath, className) {
+var MIN_AREA = 8;
+
+function getArea(feature) {
+    var parsed_path = parse_path(path(feature));
+    var topleft = find_topleft(parsed_path);
+    var bottomright = find_bottomright(parsed_path);
+    var area = (bottomright[0]-topleft[0]) * (bottomright[1]-topleft[1]);
+    return area;
+}
+
+function sortByArea(x,y) {
+    // Large-to-small
+    return getArea(x) > getArea(y) ? -1 : 1;
+}
+
+function drawOneKindOfElement(jsonPath, className) {
   d3.json(jsonPath, function(error, us) {
-    var geometries = topojson.feature(us, us.objects.geojson);
+      var geometries = topojson.feature(us, us.objects.geojson);
+
+      // Prune tiny buildings
+      var features = geometries.features.filter(function(X) { return getArea(X) > MIN_AREA; });
+
+      // Sort by area
+      features.sort(sortByArea);
+
       g.selectAll("path")
-        .data(geometries.features)
+        .data(features)
       .enter()
       .append("path")
       .attr("id", function(d) { return d.id; })
