@@ -43,8 +43,8 @@ function parse_path(pathstr) {
     if (val === "M" || val === "L") {
       pathArray.push({
         CMD: val,
-        X: parseInt(vals[i+1]),
-        Y: parseInt(vals[i+2])
+        X: parseFloat(vals[i+1]),
+        Y: parseFloat(vals[i+2])
       });
     }
     else if (val === "Z") {
