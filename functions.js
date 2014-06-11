@@ -2,8 +2,11 @@ var jsonPathGreen = "green.topo.json";
 var jsonPathBuildings = "buildings.topo.json";
 //var jsonPath = "leisure-park.topo.json";
 
+// Settings
 var transitionDuration = 1000; // ms
 var gridGapX = 4;
+var gridGapY = 4;
+var startY = 50;
 
 var m_width = $("#map").width(),
     width = 938,
@@ -13,9 +16,9 @@ var m_width = $("#map").width(),
 
 var projection = d3.geo
     .mercator()
-    .scale(400000)
+    .scale(550000)
     .center([8.404393,49.013669])
-    .translate([width/2, height/2]);
+    .translate([width/2, height/2.5]);
 
 var path = d3.geo.path()
     .projection(projection);
@@ -116,19 +119,25 @@ drawOneKindOfElement = function(jsonPath, className) {
 
 /* Order items in grid */
 arrangeItems = function(event) {
-  var pathStr, pathArray, topLeft, translateCode, newX=0;
+  var pathStr, pathArray, topLeft, translateCode, newX=0, newY=startY, maxYInThisLine=gridGapY;
   var items = g.selectAll('path');
   items.each(function(item,index) {
     path = d3.select(this);
+    if ((newX + this.getBBox().width) >= width) {
+      newY += maxYInThisLine + gridGapY;
+      newX = 0;
+      maxYInThisLine=0
+    }
     pathStr = path.attr('d');
     pathArray = parse_path(pathStr);
     topLeft = find_topleft(pathArray);
-    translateCode = generate_translatecode(topLeft, [newX,100]);
+    translateCode = generate_translatecode(topLeft, [newX,newY]);
     path
-      //.transition()
-      //.duration(transitionDuration)
+      .transition()
+      .duration(transitionDuration)
       .attr('transform', translateCode);
     newX += this.getBBox().width + gridGapX;
+    maxYInThisLine = Math.max(this.getBBox().height, maxYInThisLine);
   });
 };
 
