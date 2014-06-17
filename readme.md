@@ -11,4 +11,4 @@ There are lots of ways this project can be continued. As a first step, we plan t
 
 Neatmap was created by Simon Knebl and Matthias Gieselmann in a three-day workshop with Robert M. Ochshorn at HfG Karlsruhe in summer 2014.
 
-[Fork the project on Github](https://github.com/bildlich/neatmap) or [try it in your browser](http://bildich.github.io/neatmap).
+[Fork the project on Github](https://github.com/bildlich/neatmap) or [try it in your browser](http://bildlich.github.io/neatmap).
