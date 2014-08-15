@@ -1,0 +1,19 @@
+<osm-script output="json" timeout="60">
+  <union>
+    <query type="node">
+      <has-kv k="building" v="yes"/>
+      <bbox-query e="8.439302444458008" n="49.027457429031585" s="48.986244183531554" w="8.37158203125"/>
+    </query>
+    <query type="way">
+      <has-kv k="building" v="yes"/>
+      <bbox-query e="8.439302444458008" n="49.027457429031585" s="48.986244183531554" w="8.37158203125"/>
+    </query>
+    <query type="relation">
+      <has-kv k="building" v="yes"/>
+      <bbox-query e="8.439302444458008" n="49.027457429031585" s="48.986244183531554" w="8.37158203125"/>
+    </query>
+  </union>
+  <print mode="body"/>
+  <recurse type="down"/>
+  <print mode="skeleton" order="quadtile"/>
+</osm-script>
