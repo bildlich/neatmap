@@ -1,13 +1,18 @@
-var jsonPathGreen = "green.topo.json";
+/*
+  By Simon Knebl and Matthias Gieselmann
+  with support from Robert M. Ochshorn
+*/
+
+var jsonPathGreen = "parks.topojson";
 var jsonPathConstruction = "construction.topo.json";
-var jsonPathBuildings = "buildings.topo.json";
+var jsonPathBuildings = "buildings.topojson";
 
 // Settings
 var transitionDuration = 3000; // ms
 var gridGapX = 4;
 var gridGapY = 4;
 var startY = 20;
-var MIN_AREA = 8;
+var MIN_AREA = 2;
 
 var m_width = $("#map").width(),
     width = 938,
@@ -34,7 +39,7 @@ var svg = d3.select("#map").append("svg")
 function parse_path(pathstr) {
   //eg. pathstr is: d="M446.0252875413753,312.49818797687476L445.8401871266942,312.63011114730034L444.8529849150691,313.2017767016805L445.038085329752,313.5095955941215L444.4210839474854,313.94933562872757Z"
   //returns Array with objects [{CMD, X, Y}]
-  var cmdregex = /([MLZ])([\d.]+),([\d.]+)/g; ///[MLZ]/g;
+  var cmdregex = /([MLZ])([-\d.]+),([-\d.]+)/g;
   var vals = pathstr.split(cmdregex);
   var val;
   var pathArray = [];
@@ -87,15 +92,11 @@ function find_bottomright(path) {
 function generate_translatecode(topleft, newPos, transitionRatio){
   // return the SVG string to specify a translation to topleft coords
   var vector = [(newPos[0] - topleft[0])*transitionRatio, (newPos[1] - topleft[1])*transitionRatio];
-  return "translate("+vector[0]+","+vector[1]+")";  
+  return "translate("+Math.round(vector[0])+","+Math.round(vector[1])+")";  
 }
 
 function getArea(feature) {
-    var parsed_path = parse_path(path(feature));
-    var topleft = find_topleft(parsed_path);
-    var bottomright = find_bottomright(parsed_path);
-    var area = (bottomright[0]-topleft[0]) * (bottomright[1]-topleft[1]);
-    return area;
+    return path.area(feature);
 }
 
 function sortByArea(x,y) {
@@ -105,13 +106,40 @@ function sortByArea(x,y) {
 
 function drawOneKindOfElement(jsonPath, groupId) {
   d3.json(jsonPath, function(error, us) {
-      var geometries = topojson.feature(us, us.objects.geojson);
 
+      // get the key of the object that contains the geometries
+      // depending on how we have procured the geodata it may be
+      // "geojson", "buildings", or similar
+      console.log (us);
+      var objKey = Object.keys(us.objects)[0];
+
+      var geometries = topojson.feature(us, us.objects[objKey]);
       // Select the right group
       var g = svg.select('g#'+groupId);
 
-      // Prune tiny buildings
+      // Prune tiny features
       var features = geometries.features.filter(function(X) { return getArea(X) > MIN_AREA; });
+      var bigEnough = features.length;
+
+      /*
+      // For testing purposes: 
+      // If we have many features with few coordinates, does this make animation smoother?
+      // The answer: It doesn't.
+      // Prune features with more than Z points
+      var features = features.filter(function(X) { return X.geometry.coordinates[0].length < 10; });
+      var withFewCoordinates = features.length;
+      */
+
+      // Log some stats
+      console.log(
+        'Features before pruning: ' + geometries.features.length,
+        'Features after pruning small ones: ' + bigEnough,
+        'Features pruned b/c too small: ' + (geometries.features.length - bigEnough)
+        //'Features after pruning many coords: ' + withFewCoordinates,
+        //'Features pruned b/c too many coordinates: ' + (bigEnough - withFewCoordinates)
+      );
+
+      //console.log(features);
 
       // Sort by area
       features.sort(sortByArea);
