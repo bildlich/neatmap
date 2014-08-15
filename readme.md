@@ -17,6 +17,11 @@ Neatmap was created by Simon Knebl and Matthias Gieselmann in a three-day worksh
 
 ## How to get GeoData
 
+### Prerequisites
+
+1. [osmtogeojson](https://github.com/tyrasd/osmtogeojson)
+2. [topojson CLI](https://github.com/mbostock/topojson/wiki/Command-Line-Reference)
+
 ### A. With the shell script included in this Repo
 
 1. Use [Overpass Turbo](http://overpass-turbo.eu/) to generate a Overpass query in Overpass-XML format. Save the query as a .overpass-query file e.g. 'buildings.overpass-query'
